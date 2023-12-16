@@ -12,6 +12,7 @@ def obterListaDeJogos(driver, link, hoje, campeonato):
     
     # armazenando os links em uma lista
     for jogo in jogos:
+        idJogo = jogo.get_attribute('id')
         dia = jogo.find_element(By.CSS_SELECTOR, 'td:nth-child(2)').text
         local = jogo.find_element(By.CSS_SELECTOR, 'td:nth-child(4)').text
         adversario = jogo.find_element(By.CSS_SELECTOR, 'td:nth-child(5)').text
@@ -32,8 +33,9 @@ def obterListaDeJogos(driver, link, hoje, campeonato):
         resultado = jogo.find_element(By.CSS_SELECTOR, 'td:nth-child(1)').text
         linkJogo = jogo.find_element(By.CSS_SELECTOR, 'td:nth-child(6) > a').get_attribute('href')
         listaDeJogos.append({
+            "id": idJogo,
             "campeonato": campeonato,
-            "nomeTime": nomeTime,
+            "nome": nomeTime,
             "linkJogo": linkJogo,
             "dia": dia,
             "local": local,
@@ -50,12 +52,25 @@ def obterListaDeJogos(driver, link, hoje, campeonato):
             "cartoesVermelhos": 0,
             "except": False
         })
-    # percorrendo essa lista armazenada
     for jogo in listaDeJogos:
-        if datetime.date.fromisoformat(jogo["dia"]) < hoje:
-            driver.get(jogo["linkJogo"])
-            obterDadosDoJogo(driver, jogo, tabela)
-    salvarArquivo(campeonato, f'{nomeTime}.csv', tabela)
+        jogo_existe_no_arquivo = checar_jogo_existente(campeonato, f'{nomeTime}.csv', jogo)
+        if datetime.date.fromisoformat(jogo["dia"]) < hoje and not jogo_existe_no_arquivo:
+                obterDadosDoJogo(driver, jogo, tabela)
+    if len(tabela) == 0:
+        print('Nenhum jogo novo pra adicionar')
+    else:
+        salvarArquivo(campeonato, f'{nomeTime}.csv', tabela)
+
+def checar_jogo_existente(local, arquivo, jogo):
+    try:
+        with open(f'./{local}/{arquivo}', 'r', newline='', encoding='utf-8') as arquivo_csv:
+            leitor = csv.reader(arquivo_csv)
+            for linha in leitor:
+                if jogo["id"] in linha:
+                    return True
+        return False
+    except:
+        return False
 
 def obterDadosDoJogo(driver, jogo, tabela):
     driver.get(jogo["linkJogo"])
@@ -79,7 +94,7 @@ def obterDadosDoJogo(driver, jogo, tabela):
         jogo["cartoesVermelhos"] = len(right_bar.find_elements(By.XPATH, "//*[@id='game_report']//span[contains(@class, 'icn_zerozero') and contains(@class, 'red')]"))
         jogo["escanteios"] = int(elemento_pai_escanteios.find_element(By.XPATH, ".//div[@class='box']//div[1]").text) + int(elemento_pai_escanteios.find_element(By.XPATH, ".//div[@class='box']//div[4]").text)
         
-        print(f"{jogo['nomeTime']} {jogo['golsPro']}-{jogo['golsContra']} {jogo['adversario']}")
+        print(f"{jogo['nome']} {jogo['golsPro']}-{jogo['golsContra']} {jogo['adversario']}")
     except:
         print("Não encontrei o componente")
         jogo["except"] = True
@@ -88,27 +103,26 @@ def obterDadosDoJogo(driver, jogo, tabela):
     
 def salvarArquivo(local, arquivo, jogo):
     cabecalhos = jogo[0].keys()
+    
+    # checar se a pasta existe
     if not os.path.exists(local):
         try:
             os.mkdir(local)
         except OSError as e:
             print(f'Deu erro na criação da pasta {e}')
-    with open(f'./{local}/{arquivo}', 'w', newline='', encoding='utf-8') as arquivo_csv:
-        escritor_csv = csv.DictWriter(arquivo_csv, fieldnames=cabecalhos)
-        
-        # Escrever o cabeçalho
-        escritor_csv.writeheader()
-        
-        # Escrever os dados
-        escritor_csv.writerows(jogo)
+    
+    caminho_arquivo = os.path.join(local, arquivo)
+    
+    # caso o arquivo não exista, cria o arquivo com o cabeçalho e depois adiciona as linhas
+    if not os.path.exists(caminho_arquivo):
+        with open(caminho_arquivo, 'w', newline='') as arquivo_csv:
+            csvWriter = csv.DictWriter(arquivo_csv, fieldnames = cabecalhos)
+            csvWriter.writeheader()
+    with open(caminho_arquivo, 'a', newline='') as arquivo_csv:
+        csvWriter = csv.DictWriter(arquivo_csv, fieldnames = cabecalhos)
+        csvWriter.writerows(jogo)            
+    
     print(f'Arquivo CSV "{arquivo}" criado com sucesso.\n-----\n')
-
-def mostrarMenuCampeonatos(campeonatos):
-    print("Escolha um campeonato:")
-    for id, campeonato in enumerate(campeonatos, 1):
-        print(f"{id}. {campeonato['nome']}")
-    campeonatoEscolhido = int(input('Digite o ID do campeonato: '))
-    return campeonatos[campeonatoEscolhido - 1]
 
 def obterListaDeTimes(driver, campeonato):
     # acessar o link do campeonato
@@ -124,15 +138,6 @@ def obterListaDeTimes(driver, campeonato):
     for i, coluna in enumerate(tabelaTr, start=1):
         nomeTime = coluna.find_element(By.CSS_SELECTOR, "td:nth-child(3) > a").text
         link = coluna.find_element(By.CSS_SELECTOR, "td:nth-child(3) > a").get_attribute('href').split("?")[0]
-        times.append({"id": i, "nomeTime": nomeTime, "link": link})
+        times.append({"id": i, "nome": nomeTime, "link": link})
     
     return times
-
-def mostrarMenuTimes(times):
-    print('Escolha o time: ')
-    
-    for i, time in enumerate(times, 1):
-        print(f"{i}. {time['nomeTime']}")
-    id = int(input('Digite o número do time desejado:'))
-    
-    return times[id - 1]
