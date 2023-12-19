@@ -54,7 +54,8 @@ def obterListaDeJogos(driver, link, hoje, campeonato):
         })
     for jogo in listaDeJogos:
         jogo_existe_no_arquivo = checar_jogo_existente(campeonato, f'{nomeTime}.csv', jogo)
-        if datetime.date.fromisoformat(jogo["dia"]) < hoje and not jogo_existe_no_arquivo:
+        if datetime.date.fromisoformat(jogo["dia"]) < hoje:
+            if not jogo_existe_no_arquivo:
                 obterDadosDoJogo(driver, jogo, tabela)
     if len(tabela) == 0:
         print('Nenhum jogo novo pra adicionar')
@@ -63,7 +64,8 @@ def obterListaDeJogos(driver, link, hoje, campeonato):
 
 def checar_jogo_existente(local, arquivo, jogo):
     try:
-        with open(f'./{local}/{arquivo}', 'r', newline='', encoding='utf-8') as arquivo_csv:
+        caminho_arquivo = os.path.join(local, arquivo)
+        with open(caminho_arquivo, 'r', newline='') as arquivo_csv:
             leitor = csv.reader(arquivo_csv)
             for linha in leitor:
                 if jogo["id"] in linha:
