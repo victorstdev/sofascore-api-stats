@@ -15,5 +15,3 @@ hoje = datetime.date.today()
 inicio = time.time()
 service = Service()
 driver = webdriver.Chrome(service=service, options=chrome_options)
-
-pwd = "Oe6xfLISXyfJZsRQ"
