@@ -7,7 +7,7 @@ def obter_escolha(opcoes):
   while True:
     exibir_menu(opcoes)
     try:
-      escolha = int(input('Digite o número da opção desejada: '))
+      escolha = int(input('Digite o número do campeonato desejado: '))
       if 1 <= escolha <= len(opcoes):
         return opcoes[escolha - 1]
       else:

@@ -161,9 +161,9 @@ cython_debug/
 
 *.csv
 *.bat
+driver/
 Brasileirão/
 Bundesliga/
-driver/
 Premier League/
 Serie A Tim/
 La Liga/
