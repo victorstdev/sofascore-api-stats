@@ -1,2 +1,1 @@
-# selenium-sofascore-stats
-Selenium for web scraping football stats
+# sofascore-api-stats
