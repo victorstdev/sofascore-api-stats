@@ -18,13 +18,25 @@ def get_last_season(campeonato):
   print(f"Temporada {seasons['seasons'][0]['year']}")
   return seasons['seasons'][0]['id']
 
-def get_events(tournament, season):
+def get_standings(campeonato, temporada):
+  url = f"https://api.sofascore.com/api/v1/tournament/{campeonato['id']}/season/{temporada}/standings/total"
+  arr_standings = get_url_data(url, o.headers)['standings'][0]
+  times = []
+  for row in arr_standings['rows']:
+    detalhes = {}
+    detalhes['id'] = row['team']['id']
+    detalhes['nome'] = row['team']['name']
+    times.append(detalhes)
+  print(times)
+  return times
+
+def get_events(tournament, season, team):
   result = []
   url = f"https://api.sofascore.com/api/v1/tournament/{tournament['id']}/season/{season}/events"
   data = get_url_data(url, o.headers)
   events = [item for item in data['events']]
   for event in events:
-    if event['status']['code'] == 100:
+    if event['status']['code'] == 100 and (event['homeTeam']['name'] == team['nome'] or event['awayTeam']['name'] == team['nome']):
       event_data = {}
       event_data['id'] = event['id']
       event_data['campeonato'] = event['tournament']['name']
@@ -65,9 +77,9 @@ def check_if_folder_exists(campeonato):
     else:
         print(f"A pasta {nome} já existe.")
         
-def create_file(campeonato, dados):
+def create_file(campeonato, time, dados):
     nome_pasta = campeonato['nome']
-    nome_arquivo = f"{nome_pasta}.json"
+    nome_arquivo = f"{time['nome']}.json"
     check_if_folder_exists(campeonato)
     caminho = os.path.join(nome_pasta, nome_arquivo)
     with open(caminho, 'w') as arquivo:

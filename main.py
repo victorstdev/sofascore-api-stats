@@ -17,3 +17,5 @@ fim = time.time()
 tempo_total = (fim - inicio) / 60
 
 print(f'Tempo total de execução: {tempo_total:.2f} m')
+
+time.sleep(5)
