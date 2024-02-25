@@ -10,10 +10,10 @@ campeonato = m.obter_escolha(camp.campeonatos)
 print(f"Você escolheu: {campeonato['nome']}")
 temporada = c.get_last_season(campeonato)
 times = c.get_standings(campeonato, temporada)
-time_escolhido = m.obter_escolha(times)
-jogos = c.get_events(campeonato, temporada, time_escolhido)
-statistics = c.get_statistics(jogos)
-arquivo = c.create_file(campeonato, time_escolhido, statistics)
+for time in times:
+  jogos = c.get_events(campeonato, temporada, time)
+  statistics = c.get_statistics(jogos)
+  arquivo = c.create_file(campeonato, time, statistics)
 
 fim = time.time()
 

@@ -1,16 +1,16 @@
-def exibir_menu(opcoes):
-  print('Escolha sua opção')
-  for id, item in enumerate(opcoes, 1):
-    print(f"{id}. {item['nome']}")
+def show_menu(options):
+  print('Choose an option')
+  for id, item in enumerate(options, 1):
+    print(f"{id}. {item['name']}")
 
-def obter_escolha(opcoes):
+def choose_option(options):
   while True:
-    exibir_menu(opcoes)
+    show_menu(options)
     try:
-      escolha = int(input('Digite o número do campeonato desejado: '))
-      if 1 <= escolha <= len(opcoes):
-        return opcoes[escolha - 1]
+      choice = int(input('Enter the desired option: '))
+      if 1 <= choice <= len(options):
+        return options[choice - 1]
       else:
-        print('Opção inválida. Tente novamente')
+        print('Invalid option. Try again')
     except:
-      print('Digite um valor válido')
+      print('Enter a valid value')
