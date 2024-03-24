@@ -52,10 +52,13 @@ def get_events(tournament, season, team):
       event_data = {}
       event_data['id'] = event['id']
       event_data['tournament'] = event['tournament']['name']
+      event_data['tournamentColors'] = event['tournament']['uniqueTournament']
       event_data['day'] = datetime.datetime.fromtimestamp(event['startTimestamp']).strftime('%Y-%m-%d')
       event_data['homeTeam'] = event['homeTeam']['name']
+      event_data['homeTeamColors'] = event['homeTeam']['teamColors']
       event_data['homeScore'] = event['homeScore']['current']
       event_data['awayTeam'] = event['awayTeam']['name']
+      event_data['awayTeamColors'] = event['awayTeam']['teamColors']
       event_data['awayScore'] = event['awayScore']['current']
       result.append(event_data)
   print(f"{len(result)} matches played to date.")
